@@ -16,12 +16,18 @@ type CmdServer struct {
 }
 
 func (s *CmdServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		return
+	}
 	req := &struct {
 		Dir string
 		Cmd string
 	}{}
 	json.NewDecoder(r.Body).Decode(req)
 	c := strings.Split(req.Cmd, " ")
+	if len(c) == 0 {
+		return
+	}
 	cmd := exec.Command(c[0], c[1:]...)
 	cmd.Dir = filepath.Join(s.Dir, req.Dir)
 	out, err := cmd.CombinedOutput()
